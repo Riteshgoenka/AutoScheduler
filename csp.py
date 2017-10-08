@@ -30,6 +30,8 @@ for course in course_list:
 for course in courses:
 	available_slots[course]=list(range(1,total_slots+1))
 
+courses_copy=list(courses)
+
 for i in list(range(1,total_slots+1)):
 	slot_numstudents[i]=0
 	slot_courses[i]=[]
@@ -62,5 +64,23 @@ for i in list(range(0,len(course_list))):
 				available_slots[course].remove(s)
 			except:
 				pass
+
+c=secrets.choice(courses_copy)
+s=course_slot[c]
+available_slots[c]=[]
+for snew in list(range(1,total_slots+1)):
+	val=1
+	if(s!=snew):
+		for course in slot_courses[snew]:
+			if(common_students[course][c]>0):
+				val=0
+				break
+		if(slot_numstudents[snew]+course_numstudents[c]>total_capacity):
+			val=0
+		if(val==1):
+			available_slots[c].append(snew)
+
+if available_slots[c]:
+	snew=secrets.choice(available_slots[c])
 
 print(slot_courses)
