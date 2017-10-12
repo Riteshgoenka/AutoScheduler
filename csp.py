@@ -5,6 +5,7 @@ import secrets
 from random import shuffle
 import math
 import numpy
+import time
 
 total_capacity=0
 slots_per_day=4
@@ -26,7 +27,7 @@ weight = [100*n , 100*n , 25*n]
 
 #Simulated Annealing constants
 temperature = 30000
-alpha = 0.599
+alpha = float(input("alpha = "))
 t_limit = math.pow(10,-11)
 iterator = 10
 
@@ -85,42 +86,56 @@ while(not val):
 	except:
 		pass
 
-print(slot_courses)
+# print(slot_courses)
+
+# def consequtive_exams():
+# 	total = 0
+# 	for s in list(range(1,total_slots+1)):
+# 		if(s%slots_per_day != 0):
+# 			for c1 in slot_courses[s]:
+# 				for c2 in slot_courses[s+1]:
+# 					total += common_students[c1][c2]
+# 	return total
 
 def consequtive_exams():
-	total = 0
-	for s in list(range(1,total_slots+1)):
-		if(s%slots_per_day != 0):
+	total = {}
+	sum=0
+	for i in list(range(1,slots_per_day)):
+		total[i-1]=0
+	for s in list(range(1,slots_per_day)):
+		for i in list(range(1,slots_per_day)):
 			for c1 in slot_courses[s]:
-				for c2 in slot_courses[s+1]:
-					total += common_students[c1][c2]
-	return total
-
-def day(num):
-	return math.ceil(num/slots_per_day)
-def comb(x,y):
-	return math.factorial(x)/(math.factorial(y)*math.factorial(x-y))
-def daily_exam_limit():
-	student_slot_list = {}
-	for student in student_list:
-		try:
-			for c in student_list[student]:
-				try:
-					student_slot_list[student].append(course_slot[c])
-				except:
-					student_slot_list[student] = []
-					student_slot_list[student].append(course_slot[c])
-		except:
-			pass
-	total = 0
-	for student in student_list:
-		if (len(student_list[student])!=0):
-			util = list(map(day, student_slot_list[student]))
-			for d in list(range(1,days+1)):
-				exam_count=util.count(d)
-				if (exam_count > 2):
-					total += comb(exam_count,3)
-	return total
+					for c2 in slot_courses[s+i]:
+						if((s-1)%slots_per_day < slots_per_day-i):
+							total[i-1] += common_students[c1][c2]
+	for i in list(range(0,slots_per_day-1)):
+		sum+=(slots_per_day-i)*total[i]
+	return sum
+# def day(num):
+# 	return math.ceil(num/slots_per_day)
+# def comb(x,y):
+# 	return math.factorial(x)/(math.factorial(y)*math.factorial(x-y))
+# def daily_exam_limit():
+# 	student_slot_list = {}
+# 	for student in student_list:
+# 		try:
+# 			for c in student_list[student]:
+# 				try:
+# 					student_slot_list[student].append(course_slot[c])
+# 				except:
+# 					student_slot_list[student] = []
+# 					student_slot_list[student].append(course_slot[c])
+# 		except:
+# 			pass
+# 	total = 0
+# 	for student in student_list:
+# 		if (len(student_list[student])!=0):
+# 			util = list(map(day, student_slot_list[student]))
+# 			for d in list(range(1,days+1)):
+# 				exam_count=util.count(d)
+# 				if (exam_count > 2):
+# 					total += comb(exam_count,3)
+# 	return total
 
 def prof_preference():
 	total = 0
@@ -132,9 +147,14 @@ def prof_preference():
 	return total
 
 def calc_score():
-	result = (100*consequtive_exams()+100*daily_exam_limit()+25*prof_preference())*n
+	result = (100*consequtive_exams()+25*prof_preference())*n
 	return result
 
+# stime = time.time()
+# print(consequtive_exams())
+# etime = time.time()
+# print(etime - stime)
+# print(daily_exam_limit())
 count_t = 0
 print (calc_score())
 while(temperature > t_limit):
@@ -170,6 +190,6 @@ while(temperature > t_limit):
 					break
 	temperature *= alpha
 
-print(slot_courses)
+# print(slot_courses)
 print (calc_score())
 print (count_t)
