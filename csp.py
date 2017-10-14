@@ -27,7 +27,7 @@ weight = [100*n , 100*n , 25*n]
 
 #Simulated Annealing constants
 temperature = 30000
-alpha = float(input("alpha = "))
+alpha = 0.99
 t_limit = math.pow(10,-11)
 iterator = 10
 
@@ -77,7 +77,7 @@ while(not val):
 						available_slots[course].remove(s)
 					except:
 						pass
-				elif(slot_numstudents[s]+course_numstudents[course]>total_capacity):
+				elif(slot_numstudents[s]+course_numstudents[course]>0.8*total_capacity):
 					try:
 						available_slots[course].remove(s)
 					except:
@@ -86,7 +86,7 @@ while(not val):
 	except:
 		pass
 
-# print(slot_courses)
+print(slot_courses)
 
 # def consequtive_exams():
 # 	total = 0
@@ -170,7 +170,7 @@ while(temperature > t_limit):
 					if(common_students[course][c]>0):
 						val=0
 						break
-				if(slot_numstudents[snew]+course_numstudents[c]>total_capacity):
+				if(slot_numstudents[snew]+course_numstudents[c]>0.8*total_capacity):
 					val=0
 				if(val==1):
 					count_t += 1
