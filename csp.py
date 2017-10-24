@@ -1,11 +1,11 @@
 from generate_course_list import course_list
 from generate_student_list import student_list
 from generate_room_list import room_list
+from generate_prof_input_list import prof_input
 import secrets
 from random import shuffle
 import math
 import numpy
-import time
 
 total_capacity=0
 slots_per_day=4
@@ -20,19 +20,30 @@ course_slot={}
 slot_courses={}
 slot_numstudents={}
 
-prof_input = {}
+##
+#\brief Import variables from the files generating course_list, room_list, student_list. 
+#\var total_capacity It is the maximum number of students that can take examination at once.
+#\var course_list It is the course list
 
-n = 1   # (Experimental constant, to be varied to check best solution)
-weight = [100*n , 100*n , 25*n]
+##
+#\brief
+# Here we attempt to get a random feasible solution(ie a solution which satisfies all hard  constraints).
+#  \li \c That is we first randomly allot a course to to a slot.
+#  \li \c Then we allot slots to courses in  similar fashion.
+#  \li \c If we fail in this attempt we restart the loop and allot the course some other random slot.
+# Note- Here we are considering that there exists finitely many solutions for the given number of slots. 
 
 #Simulated Annealing constants
+
+n=1
 temperature = 30000
 alpha = 0.99
 t_limit = math.pow(10,-11)
 iterator = 10
-
 for room in room_list:
 	total_capacity+=int(room_list[room])
+
+## \brief Create a 2d array of the common students in the course1 and course2 
 
 for course in course_list:
 	c=course_list[course]
@@ -86,18 +97,10 @@ while(not val):
 	except:
 		pass
 
-print(slot_courses)
-
-# def consequtive_exams():
-# 	total = 0
-# 	for s in list(range(1,total_slots+1)):
-# 		if(s%slots_per_day != 0):
-# 			for c1 in slot_courses[s]:
-# 				for c2 in slot_courses[s+1]:
-# 					total += common_students[c1][c2]
-# 	return total
-
 def consequtive_exams():
+	## \var sum Stores the penalty incurred
+	# \brief  Takes into account the student is not overloaded with exams on a particular day.
+	# \return This returns the total penalty incurred if exams of the student are clustered. 
 	total = {}
 	sum=0
 	for i in list(range(1,slots_per_day)):
@@ -111,52 +114,25 @@ def consequtive_exams():
 	for i in list(range(0,slots_per_day-1)):
 		sum+=(slots_per_day-i)*total[i]
 	return sum
-# def day(num):
-# 	return math.ceil(num/slots_per_day)
-# def comb(x,y):
-# 	return math.factorial(x)/(math.factorial(y)*math.factorial(x-y))
-# def daily_exam_limit():
-# 	student_slot_list = {}
-# 	for student in student_list:
-# 		try:
-# 			for c in student_list[student]:
-# 				try:
-# 					student_slot_list[student].append(course_slot[c])
-# 				except:
-# 					student_slot_list[student] = []
-# 					student_slot_list[student].append(course_slot[c])
-# 		except:
-# 			pass
-# 	total = 0
-# 	for student in student_list:
-# 		if (len(student_list[student])!=0):
-# 			util = list(map(day, student_slot_list[student]))
-# 			for d in list(range(1,days+1)):
-# 				exam_count=util.count(d)
-# 				if (exam_count > 2):
-# 					total += comb(exam_count,3)
-# 	return total
 
 def prof_preference():
 	total = 0
 	for c in prof_input:
-		if course_slot[c] in prof_input[c]:       # (prof_input) needs to be defined #
-			continue
-		else:
+		if course_slot[c] in prof_input[c]:
 			total += 1
 	return total
 
 def calc_score():
-	result = (100*consequtive_exams()+25*prof_preference())*n
+	## \var result total penalty
+	# \return This returns the total penalty Due to Constraints 
+	result = (5*consequtive_exams()+25*prof_preference())*n
 	return result
 
-# stime = time.time()
-# print(consequtive_exams())
-# etime = time.time()
-# print(etime - stime)
-# print(daily_exam_limit())
 count_t = 0
-print (calc_score())
+
+## STEP ANHEALING
+#\brief Here we generate neighbourhood solutions and try to get to to the most optimized solution by iterating over solutions.
+
 while(temperature > t_limit):
 	for i in list(range(0,iterator)):
 		c=secrets.choice(courses_copy)
@@ -190,6 +166,37 @@ while(temperature > t_limit):
 					break
 	temperature *= alpha
 
-# print(slot_courses)
-print (calc_score())
-print (count_t)
+## Hill Climbing
+# \brief In approximately 5-10% of cases, the simulated annealing algorithm had not sufficiently explored the neighbourhood of its best solution.
+
+iterate = 0
+while(iterate < 1000):
+	for i in list(range(0,iterator)):
+		c=secrets.choice(courses_copy)
+		s=course_slot[c]
+		slot_list=list(range(1,total_slots+1))
+		shuffle(slot_list)
+		for snew in slot_list:
+			val=1
+			if(s!=snew):
+				for course in slot_courses[snew]:
+					if(common_students[course][c]>0):
+						val=0
+						break
+				if(slot_numstudents[snew]+course_numstudents[c]>0.8*total_capacity):
+					val=0
+				if(val==1):
+					o_x = calc_score()
+					slot_courses[s].remove(c)
+					course_slot[c]=snew
+					slot_courses[snew].append(c)
+					o_q = calc_score()
+					var = o_x - o_q
+					if (var > 0):
+						iterate=0
+					else:
+						iterate+=1
+						slot_courses[snew].remove(c)
+						course_slot[c]=s
+						slot_courses[s].append(c)
+					break
