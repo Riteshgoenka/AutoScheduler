@@ -1,0 +1,7 @@
+<form method="POST" action="/timetable/userlogin" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="file1" title='Please upload file in csv format only'>
+    <input type="file" name="file2" title='Please upload file in csv format only'>
+    <input type="file" name="file3" title='Please upload file in csv format only'>
+    <button type="submit">Upload</button>
+    </form>

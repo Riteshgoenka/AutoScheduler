@@ -1,0 +1,56 @@
+<html>
+<head>
+  <title>My Homepage</title>
+  <meta charset="utf-8" />
+  <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,700' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+  <style>
+  body {
+  	font-family: 'Roboto', sans-serif;
+  	font-weight: 300;
+  }
+  .jumbotron {
+  	background-size: cover;
+  	background-color: rgb(106,175,202);
+  	height: 200px;
+  }
+  h1 {
+  	text-align: center;
+  	color: rgb(255,255,255);
+  }
+  </style>
+</head>
+
+<body>
+<section id="home" class="jumbotron" align="left">
+  <div class="container">
+  	<h1>Your Timetable</h1>
+  </div>
+</section><br><br>
+
+<div class="container">
+<table class="table table-hover">
+	<thead>
+	<tr>
+		<th> Course_ID </th>
+		<th> Slot </th>
+		<th> Room </th>
+	</tr>
+	</thead>
+	<tbody>
+	{% for c in context %}
+	<tr>
+		<td> {{ c.course_id }} </td>
+		<td> {{ c.slot }} </td>
+		<td> {{ c.rooms }} </td>
+	</tr>
+	{% endfor %}
+	</tbody>
+</table>
+</div>
+<br>
+<div class="container" align="right">
+<a href="{% url 'timetable:password' %}">Change Password</a><br>
+<a href="{% url 'timetable:userlogout' %}">LOGOUT</a>
+</body>
+</html>
